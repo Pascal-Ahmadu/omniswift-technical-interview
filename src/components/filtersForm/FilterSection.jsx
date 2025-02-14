@@ -19,8 +19,8 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
   const [pendingNotifications, setPendingNotifications] = useState([]);
 
   // Debounced notification handler
-  const showPendingNotifications = useCallback(
-    debounce(() => {
+  const showPendingNotifications = useCallback(() => {
+    const debouncedNotify = debounce(() => {
       if (pendingNotifications.length === 0) return;
 
       if (pendingNotifications.length === 1) {
@@ -29,9 +29,11 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
         toast.info(`Updated filters: ${pendingNotifications.join(', ')}`);
       }
       setPendingNotifications([]);
-    }, DEBOUNCE_DELAY),
-    [pendingNotifications]
-  );
+    }, DEBOUNCE_DELAY);
+    
+    debouncedNotify();
+    return debouncedNotify.cancel;
+  }, [pendingNotifications]);
 
   const handleFilterChange = (filterType, value) => {
     onFilterChange(filterType, value);
