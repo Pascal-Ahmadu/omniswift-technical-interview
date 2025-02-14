@@ -3,6 +3,25 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import ApiService from '../../../api/services/api.service';
 
+// PDF configuration constants
+const PDF_CONFIG = {
+  format: 'a4',
+  unit: 'mm',
+  orientation: 'p',
+  dimensions: {
+    width: 210, // A4 width in mm
+    pixelWidth: 595, // A4 width in pixels
+    pixelHeight: 842 // A4 height in pixels
+  }
+};
+
+const HTML2CANVAS_CONFIG = {
+  scale: 7,
+  useCORS: true,
+  backgroundColor: '#ffffff',
+  logging: import.meta.env.MODE === 'development'
+};
+
 export const useStudentPDF = ({ students, onSuccess, onError }) => {
   const [printData, setPrintData] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -14,12 +33,13 @@ export const useStudentPDF = ({ students, onSuccess, onError }) => {
 
       try {
         const pdf = await createPDF(printRef.current, printData.reg_no);
-        pdf.save(`Student_Result_${printData.reg_no || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`);
+        const filename = generateFilename(printData.reg_no);
+        pdf.save(filename);
         onSuccess?.();
-        resetPrintState();
       } catch (err) {
         console.error('Error generating PDF:', err);
         onError?.();
+      } finally {
         resetPrintState();
       }
     };
@@ -29,9 +49,10 @@ export const useStudentPDF = ({ students, onSuccess, onError }) => {
 
   const handleDownload = async (id) => {
     try {
-      // Use the viewResult method from the default ApiService instance
-      const response = await ApiService.viewResult(id);
-      const student = students.find((s) => s.id === id);
+      const [response, student] = await Promise.all([
+        ApiService.viewResult(id),
+        findStudent(students, id)
+      ]);
       
       if (!student) throw new Error('Student not found');
       
@@ -43,6 +64,7 @@ export const useStudentPDF = ({ students, onSuccess, onError }) => {
       onError?.();
     }
   };
+
   const resetPrintState = () => {
     setIsPrinting(false);
     setPrintData(null);
@@ -58,49 +80,69 @@ export const useStudentPDF = ({ students, onSuccess, onError }) => {
 };
 
 // Helper functions
-const createPDF = async (container, reg_no) => {
-  // Set container styles for capture
-  configureContainerForCapture(container);
+const createPDF = async (container) => {
+  const containerStyles = getContainerStyles();
+  Object.assign(container.style, containerStyles);
   
-  // Allow time for assets to load
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Wait for images to load
+  await waitForImages(container);
 
   const canvas = await html2canvas(container, {
-    scale: 7,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    windowWidth: 595, // A4 width in pixels
-    windowHeight: 842, // A4 height in pixels
-    logging: true,
-    onclone: (clonedDoc) => {
-      const clonedContainer = clonedDoc.getElementById('print-container');
-      if (clonedContainer) {
-        clonedContainer.style.visibility = 'visible';
-      }
-    }
+    ...HTML2CANVAS_CONFIG,
+    windowWidth: PDF_CONFIG.dimensions.pixelWidth,
+    windowHeight: PDF_CONFIG.dimensions.pixelHeight,
+    onclone: handleClonedDocument
   });
 
-  // Create PDF
-  const imgWidth = 210; // A4 width in mm
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const imgData = canvas.toDataURL('image/png', 1.0);
+  return generatePDFFromCanvas(canvas);
+};
+
+const waitForImages = async (container) => {
+  const images = Array.from(container.getElementsByTagName('img'));
+  const imagePromises = images.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+  });
+
+  return Promise.all(imagePromises);
+};
+
+const generatePDFFromCanvas = (canvas) => {
+  const { width, pixelWidth } = PDF_CONFIG.dimensions;
+  const imgHeight = (canvas.height * width) / pixelWidth;
+  const pdf = new jsPDF(PDF_CONFIG.orientation, PDF_CONFIG.unit, PDF_CONFIG.format);
   
-  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+  const imgData = canvas.toDataURL('image/png', 1.0);
+  pdf.addImage(imgData, 'PNG', 0, 0, width, imgHeight);
+  
   return pdf;
 };
 
-const configureContainerForCapture = (container) => {
-  Object.assign(container.style, {
-    visibility: 'visible',
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    width: '595px',
-    height: '842px',
-    backgroundColor: 'white'
-  });
+const getContainerStyles = () => ({
+  visibility: 'visible',
+  position: 'fixed',
+  top: '0',
+  left: '0',
+  width: `${PDF_CONFIG.dimensions.pixelWidth}px`,
+  height: `${PDF_CONFIG.dimensions.pixelHeight}px`,
+  backgroundColor: 'white'
+});
+
+const handleClonedDocument = (clonedDoc) => {
+  const clonedContainer = clonedDoc.getElementById('print-container');
+  if (clonedContainer) {
+    clonedContainer.style.visibility = 'visible';
+  }
 };
+
+const generateFilename = (regNo) => 
+  `Student_Result_${regNo || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+const findStudent = (students, id) => 
+  students.find((s) => s.id === id);
 
 const mergeStudentData = (student, apiResponse) => {
   const {

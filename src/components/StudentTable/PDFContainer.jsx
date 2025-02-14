@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import StudentResult from './resultTemplate/StudentResult';
 
 export const PDFContainer = React.forwardRef(({ printData, isPrinting }, ref) => {
@@ -22,5 +23,10 @@ export const PDFContainer = React.forwardRef(({ printData, isPrinting }, ref) =>
     </div>
   );
 });
+PDFContainer.displayName = 'PDFContainer';
 
+PDFContainer.propTypes = {
+  printData: PropTypes.object,
+  isPrinting: PropTypes.bool
+};
 PDFContainer.displayName = 'PDFContainer';

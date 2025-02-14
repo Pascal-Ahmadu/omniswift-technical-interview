@@ -1,49 +1,15 @@
-import React from 'react';
+// FilterSelect.jsx
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import PropTypes from 'prop-types';
 
 export const FilterSelect = ({ label, value, options, onChange, disabled }) => {
-  const styles = {
-    formControl: {
-      height: '64px',
-      '& .MuiInputLabel-root': {
-        fontFamily: 'Lato',
-        fontWeight: 500,
-        fontSize: '14px',
-        lineHeight: '16px',
-        letterSpacing: '0.4px',
-        color: '#343434'
-      }
-    },
-    select: {
-      borderRadius: '4px',
-      '& .MuiOutlinedInput-notchedOutline': { 
-        borderColor: '#ADB7BE',
-        borderWidth: '1px'
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': { 
-        borderColor: '#ADB7BE' 
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
-        borderColor: '#ADB7BE' 
-      },
-      '& .MuiSelect-select': {
-        fontFamily: 'Lato',
-        fontSize: '14px',
-        lineHeight: '24px',
-        letterSpacing: '0.44px',
-        color: '#ADB7BE'
-      }
-    }
-  };
-
   return (
-    <FormControl fullWidth sx={styles.formControl} disabled={disabled}>
+    <FormControl fullWidth disabled={disabled}>
       <InputLabel>{label}</InputLabel>
       <Select
         value={value}
         label={label}
         onChange={onChange}
-        sx={styles.select}
       >
         {options.map((option, index) => (
           <MenuItem 
@@ -57,4 +23,12 @@ export const FilterSelect = ({ label, value, options, onChange, disabled }) => {
       </Select>
     </FormControl>
   );
+};
+
+FilterSelect.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  options: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool
 };

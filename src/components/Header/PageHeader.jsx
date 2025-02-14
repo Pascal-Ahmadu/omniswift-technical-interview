@@ -1,4 +1,5 @@
 import { Typography, useTheme, useMediaQuery } from '@mui/material';
+import PropTypes from 'prop-types';
 
 export const PageHeader = ({ title }) => {
   const theme = useTheme();
@@ -15,4 +16,8 @@ export const PageHeader = ({ title }) => {
       {title}
     </Typography>
   );
+};
+
+PageHeader.propTypes = {
+  title: PropTypes.string.isRequired
 };

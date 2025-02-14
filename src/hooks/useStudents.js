@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState,  useCallback } from 'react';
 import ApiService from '../api/services/api.service';
 
 export const useStudents = () => {

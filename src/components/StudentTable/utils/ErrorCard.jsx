@@ -1,5 +1,6 @@
-import React from 'react';
+
 import { Card, CardContent, Typography, Alert } from '@mui/material';
+import PropTypes from 'prop-types';
 
 export const ErrorCard = ({ error }) => {
   return (
@@ -23,4 +24,8 @@ export const ErrorCard = ({ error }) => {
       </CardContent>
     </Card>
   );
+};
+
+ErrorCard.propTypes = {
+  error: PropTypes.string.isRequired
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import {
   Table,
   TableHead,
@@ -9,7 +9,7 @@ import {
   CardContent,
   Skeleton
 } from '@mui/material';
-import { StyledTableCell, StyledTableRow, StyledTableContainer } from './StyledComponents';
+import { StyledTableCell,  StyledTableContainer } from './StyledComponents';
 import { TABLE_HEADERS } from './constants'; // Ensure you import your table headers
 
 export const TableSkeleton = () => {

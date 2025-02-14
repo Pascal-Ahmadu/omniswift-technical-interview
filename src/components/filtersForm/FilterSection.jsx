@@ -1,17 +1,37 @@
-import React from 'react';
+
 import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
+import { useState, useCallback } from 'react';
+import { debounce } from 'lodash';
 import {
   Grid,
   Paper,
   Typography,
-  Box
+  Box,
+  Button
 } from '@mui/material';
 import { FilterSelect } from './familySelect/FilterSelect';
 import { SearchButton } from './searchButton/SearchButton';
-import { useFilterData } from './hooks/useFilterData';
+import { useFilterData, DEBOUNCE_DELAY } from './hooks/useFilterData';
 
 export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
-  const { filterOptions, isLoading, error } = useFilterData();
+  const { filterOptions, isLoading, error, retry } = useFilterData();
+  const [pendingNotifications, setPendingNotifications] = useState([]);
+
+  // Debounced notification handler
+  const showPendingNotifications = useCallback(
+    debounce(() => {
+      if (pendingNotifications.length === 0) return;
+
+      if (pendingNotifications.length === 1) {
+        toast.info(pendingNotifications[0]);
+      } else {
+        toast.info(`Updated filters: ${pendingNotifications.join(', ')}`);
+      }
+      setPendingNotifications([]);
+    }, DEBOUNCE_DELAY),
+    [pendingNotifications]
+  );
 
   const handleFilterChange = (filterType, value) => {
     onFilterChange(filterType, value);
@@ -28,13 +48,21 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
         ? value.charAt(0).toUpperCase() + value.slice(1)
         : value;
         
-      toast.info(`${filterLabels[filterType]} filter set to: ${displayValue}`);
+      setPendingNotifications(prev => [
+        ...prev,
+        `${filterLabels[filterType]}: ${displayValue}`
+      ]);
+      showPendingNotifications();
     }
   };
 
   const handleSearch = () => {
+    // Clear any pending filter notifications
+    setPendingNotifications([]);
+    showPendingNotifications.cancel();
+
     const activeFilters = Object.entries(filters)
-      .filter(([_, value]) => value)
+      .filter(([, value]) => value)
       .map(([key, value]) => `${key}: ${value}`)
       .join(', ');
 
@@ -48,12 +76,16 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
 
   if (error) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center', color: 'error.main' }}>
-        {error}
+      <Paper sx={{ p: 3, textAlign: 'center' }}>
+        <Typography color="error" gutterBottom>
+          {error}
+        </Typography>
+        <Button onClick={retry} variant="contained" sx={{ mt: 2 }}>
+          Retry Loading Filters
+        </Button>
       </Paper>
     );
   }
-
   return (
     <Paper
       sx={{
@@ -130,6 +162,16 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
       </Box>
     </Paper>
   );
+};
+FilterSection.propTypes = {
+  filters: PropTypes.shape({
+    age: PropTypes.string,
+    state: PropTypes.string,
+    level: PropTypes.string,
+    gender: PropTypes.string
+  }).isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired
 };
 
 export default FilterSection;

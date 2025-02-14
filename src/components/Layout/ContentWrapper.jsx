@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
 
 export const ContentWrapper = ({ children }) => (
   <Box
@@ -21,3 +22,7 @@ export const ContentWrapper = ({ children }) => (
     {children}
   </Box>
 );
+
+ContentWrapper.propTypes = {
+  children: PropTypes.node.isRequired
+};

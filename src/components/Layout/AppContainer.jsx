@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
 
 export const AppContainer = ({ children }) => (
   <Box
@@ -12,3 +13,7 @@ export const AppContainer = ({ children }) => (
     {children}
   </Box>
 );
+
+AppContainer.propTypes = {
+  children: PropTypes.node.isRequired,
+};

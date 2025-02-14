@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useStudentPDF } from './hooks/useStudentPDF';
@@ -7,6 +7,7 @@ import { ErrorCard } from './utils/ErrorCard';
 import { StudentTableView } from './StudentTableView';
 import { PDFContainer } from './PDFContainer';
 import { TABLE_HEADERS } from './index';
+import PropTypes from 'prop-types';
 
 const StudentTable = ({ students, loading, error }) => {
   const {
@@ -45,6 +46,11 @@ const StudentTable = ({ students, loading, error }) => {
       />
     </>
   );
+};
+StudentTable.propTypes = {
+  students: PropTypes.arrayOf(PropTypes.object).isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.string
 };
 
 export default StudentTable;
