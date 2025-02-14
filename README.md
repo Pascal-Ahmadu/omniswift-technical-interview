@@ -6,7 +6,7 @@ A comprehensive React-based student management system showcasing modern developm
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- npm or yarn
+- npm
 - Git
 
 ### Installation
