@@ -12,7 +12,7 @@ A comprehensive React-based student management system showcasing modern developm
 ### Installation
 1. Clone the repository
 ```bash
-git clone [repository-url]
+git clone https://github.com/Pascal-Ahmadu/omniswift-technical-interview.git
 cd omniswift-technical-interview
 ```
 
