@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import ApiService from '../../../api/services/api.service';
 
-export const DEBOUNCE_DELAY = 300;
+export const DEBOUNCE_DELAY = 500;
 /**
  * Normalizes API response data with enhanced error checking.
  *
