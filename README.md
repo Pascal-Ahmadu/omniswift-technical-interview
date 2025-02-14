@@ -1,4 +1,4 @@
-# Student Management System
+# omniswift-technical-interview
 
 A comprehensive React-based student management system showcasing modern development practices, Material-UI implementation, and PDF generation capabilities. Built as a technical interview project for Omniswift.
 
