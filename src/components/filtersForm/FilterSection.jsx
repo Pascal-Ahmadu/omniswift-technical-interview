@@ -1,7 +1,6 @@
-
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { debounce } from 'lodash';
 import {
   Grid,
@@ -18,9 +17,9 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
   const { filterOptions, isLoading, error, retry } = useFilterData();
   const [pendingNotifications, setPendingNotifications] = useState([]);
 
-  // Debounced notification handler
-  const showPendingNotifications = useCallback(() => {
-    const debouncedNotify = debounce(() => {
+  // Create a ref to hold the debounced notification function
+  const debouncedNotifyRef = useRef(
+    debounce(() => {
       if (pendingNotifications.length === 0) return;
 
       if (pendingNotifications.length === 1) {
@@ -29,15 +28,12 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
         toast.info(`Updated filters: ${pendingNotifications.join(', ')}`);
       }
       setPendingNotifications([]);
-    }, DEBOUNCE_DELAY);
-    
-    debouncedNotify();
-    return debouncedNotify.cancel;
-  }, [pendingNotifications]);
+    }, DEBOUNCE_DELAY)
+  );
 
   const handleFilterChange = (filterType, value) => {
     onFilterChange(filterType, value);
-    
+
     if (value) {
       const filterLabels = {
         age: 'Age',
@@ -45,34 +41,38 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
         level: 'Level',
         gender: 'Gender'
       };
-      
-      const displayValue = filterType === 'state' || filterType === 'gender'
-        ? value.charAt(0).toUpperCase() + value.slice(1)
-        : value;
-        
-      setPendingNotifications(prev => [
+
+      const displayValue =
+        filterType === 'state' || filterType === 'gender'
+          ? value.charAt(0).toUpperCase() + value.slice(1)
+          : value;
+
+      setPendingNotifications((prev) => [
         ...prev,
         `${filterLabels[filterType]}: ${displayValue}`
       ]);
-      showPendingNotifications();
+
+      // Trigger the debounced notification
+      debouncedNotifyRef.current();
     }
   };
 
   const handleSearch = () => {
-    // Clear any pending filter notifications
+    // Clear any pending notifications and cancel the debounced call
     setPendingNotifications([]);
-    showPendingNotifications.cancel();
+    debouncedNotifyRef.current.cancel();
 
     const activeFilters = Object.entries(filters)
       .filter(([, value]) => value)
       .map(([key, value]) => `${key}: ${value}`)
       .join(', ');
 
-    toast.success(activeFilters 
-      ? `Searching with filters: ${activeFilters}`
-      : 'Searching with no filters applied'
+    toast.success(
+      activeFilters
+        ? `Searching with filters: ${activeFilters}`
+        : 'Searching with no filters applied'
     );
-    
+
     onSearch();
   };
 
@@ -113,8 +113,8 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
           }
         }}
       >
-        <Typography 
-          sx={{ 
+        <Typography
+          sx={{
             mb: 3,
             fontFamily: 'Lato',
             fontSize: '24px',
@@ -128,9 +128,9 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
           Filter Student Table By:
         </Typography>
 
-        <Grid 
-          container 
-          rowSpacing={{ xs: 2, md: 3 }} 
+        <Grid
+          container
+          rowSpacing={{ xs: 2, md: 3 }}
           columnSpacing={2}
           sx={{
             width: '100%',
@@ -148,23 +148,23 @@ export const FilterSection = ({ filters, onFilterChange, onSearch }) => {
                 label={label}
                 value={value}
                 options={options}
-                onChange={(e) => handleFilterChange(label.toLowerCase(), e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange(label.toLowerCase(), e.target.value)
+                }
                 disabled={isLoading}
               />
             </Grid>
           ))}
 
           <Grid item xs={12} md={4}>
-            <SearchButton 
-              onClick={handleSearch}
-              disabled={isLoading}
-            />
+            <SearchButton onClick={handleSearch} disabled={isLoading} />
           </Grid>
         </Grid>
       </Box>
     </Paper>
   );
 };
+
 FilterSection.propTypes = {
   filters: PropTypes.shape({
     age: PropTypes.string,

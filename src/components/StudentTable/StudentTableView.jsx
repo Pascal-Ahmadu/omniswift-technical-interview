@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableHead,
@@ -11,6 +10,7 @@ import {
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { StyledTableCell, StyledTableRow, StyledTableContainer } from './StyledComponents';
+
 const StudentRow = ({ student, onDownload }) => (
   <StyledTableRow>
     <StyledTableCell>{student.id}</StyledTableCell>
@@ -63,20 +63,6 @@ const EmptyState = () => (
   </StyledTableRow>
 );
 
-StudentTableView.propTypes = {
-  students: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    surname: PropTypes.string.isRequired,
-    firstname: PropTypes.string.isRequired,
-    age: PropTypes.number.isRequired,
-    gender: PropTypes.string.isRequired,
-    level: PropTypes.string.isRequired,
-    state: PropTypes.string.isRequired,
-  })).isRequired,
-  headers: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onDownload: PropTypes.func.isRequired,
-};
-
 export const StudentTableView = ({ students, headers, onDownload }) => {
   return (
     <Card
@@ -128,4 +114,20 @@ export const StudentTableView = ({ students, headers, onDownload }) => {
       </CardContent>
     </Card>
   );
+};
+
+StudentTableView.propTypes = {
+  students: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      surname: PropTypes.string.isRequired,
+      firstname: PropTypes.string.isRequired,
+      age: PropTypes.number.isRequired,
+      gender: PropTypes.string.isRequired,
+      level: PropTypes.string.isRequired,
+      state: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  headers: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onDownload: PropTypes.func.isRequired,
 };
