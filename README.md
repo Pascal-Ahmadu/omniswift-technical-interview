@@ -13,7 +13,7 @@ A comprehensive React-based student management system showcasing modern developm
 1. Clone the repository
 ```bash
 git clone [repository-url]
-cd student-management-system
+cd omniswift-technical-interview
 ```
 
 2. Install dependencies
